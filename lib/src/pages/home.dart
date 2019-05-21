@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:kt_dart/collection.dart';
+
 import 'package:movies_app/src/models/movie_entity.dart';
 import 'package:movies_app/src/moviesdb_api.dart';
 import 'package:movies_app/src/widgets/buttons_group.dart';
+import 'package:movies_app/src/widgets/movies_swiper.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -13,87 +14,63 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   StreamController<KtList<MovieEntity>> _swiperDataController;
-
-  final Map<int, Widget> segmentedOptions = const <int, Widget>{
-    0: Text('Now Playing'),
-    1: Text('Top Rated'),
-    2: Text('Upcoming')
-  };
+  moviesDBAPIEndpoints buttonSelected = moviesDBAPIEndpoints.NOW_PLAYING;
 
   @override
   void initState() {
     super.initState();
-    _swiperDataController = new StreamController<KtList<MovieEntity>>();
-    _getPlayingMovies();
+
+    _swiperDataController = new StreamController<KtList<MovieEntity>>.broadcast();
+    _getSwiperMovies(buttonSelected);
   }
 
-  _getPlayingMovies() async {
-    KtList<MovieEntity> result = await moviesDBAPI.getNowPlaying();
-    _swiperDataController .add(result);
+  void _getSwiperMovies(moviesDBAPIEndpoints movieEndpoint) async {
+
+    KtList<MovieEntity> result = await moviesDBAPI.getMovies(movieEndpoint);
+
+    _swiperDataController.add(result);
   }
 
-  Widget _buildSwiper() {
-    return StreamBuilder(
-        stream: _swiperDataController.stream,
-        builder: (BuildContext context, AsyncSnapshot<KtList<MovieEntity>> snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-              return Center(
-                child: Text('Not found'),
-              );
-            case ConnectionState.waiting:
-              return Center(
-                  child: CircularProgressIndicator(
-                      backgroundColor: Colors.red,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.redAccent)
-                  )
-              );
-            default:
-              return Swiper(
-                  layout: SwiperLayout.STACK,
-                  itemCount: snapshot.data.size,
-                  itemWidth: 300.0,
-                  itemHeight: 500.0,
-                  itemBuilder: (BuildContext context, index) {
-                    MovieEntity item = snapshot.data.get(index);
+  void _handleSwiperButtonPressed(moviesDBAPIEndpoints movieEndpoint) {
+    if (movieEndpoint != buttonSelected) {
+      _getSwiperMovies(movieEndpoint);
 
-                    return ClipRRect(
-                        borderRadius: BorderRadius.circular(20.0),
-                        child: FadeInImage(
-                            placeholder: AssetImage('assets/images/placeholder.png'),
-                            image: NetworkImage(item.getPosterImage()),
-                            fit: BoxFit.fill
-                        )
-                    );
-
-                  });
-
-          }
-        }
-    );
+      setState(() {
+        buttonSelected = movieEndpoint;
+      });
+    }
   }
 
-  Widget _buildSegmentedControl () {
+  Widget _buildButtonsGroup () {
+    List<Map<String, dynamic>> buttons = [
+      {
+        'text': 'Now playing',
+        'type': moviesDBAPIEndpoints.NOW_PLAYING
+      },
+      {
+        'text': 'Top Rated',
+        'type': moviesDBAPIEndpoints.TOP_RATED
+      },
+      {
+        'text': 'Upcoming',
+        'type': moviesDBAPIEndpoints.UPCOMING
+      },
+    ];
+
     return Container(
       alignment: Alignment.center,
       margin: EdgeInsets.only(bottom: 20.0),
       width: 350.0,
       child: ButtonsGroup(
-              children: [
-                ButtonGroup(
-                    onPressed: (){},
-                    child: Text('Now Playing')
-                ),
-                ButtonGroup(
-                    onPressed: (){},
-                    child: Text('Top Rated')
-                ),
-                ButtonGroup(
-                    onPressed: (){},
-                    child: Text('Upcoming')
-                ),
-              ],
-            ),
+        children: buttons.map((item) => ButtonGroup(
+            onPressed: (){
+              _handleSwiperButtonPressed(item['type']);
+            },
+            child: Text(item['text']),
+            isActived: buttonSelected == item['type'],
+          )
+        ).toList(),
+      ),
     );
   }
 
@@ -110,8 +87,8 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
-            _buildSegmentedControl(),
-            _buildSwiper()
+            _buildButtonsGroup(),
+            MoviesSwiper(stream: _swiperDataController.stream)
           ],
         ),
       ),
@@ -120,7 +97,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
-    _swiperDataController.close();
     super.dispose();
+    _swiperDataController.close();
   }
 }

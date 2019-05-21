@@ -1,22 +1,25 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
-import 'package:kt_dart/collection.dart';
+import 'package:kt_dart/kt.dart';
 import 'package:movies_app/src/models/movie_entity.dart';
-import 'package:movies_app/src/moviesdb_api.dart';
 
-class HomePage extends StatefulWidget {
+
+class MoviesSwiper extends StatelessWidget {
+  MoviesSwiper({ @required this.stream });
+
+  Stream<KtList<MovieEntity>> stream;
+
   @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  Widget _buildSwiper() {
-    return FutureBuilder(
-        future: moviesDBAPI.getMovies(moviesDBAPIEndpoints.NOW_PLAYING),
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+        stream: stream,
         builder: (BuildContext context, AsyncSnapshot<KtList<MovieEntity>> snapshot) {
-
           switch (snapshot.connectionState) {
             case ConnectionState.none:
+              return Center(
+                child: Text('Not found'),
+              );
             case ConnectionState.waiting:
               return Center(
                   child: CircularProgressIndicator(
@@ -45,22 +48,7 @@ class _HomePageState extends State<HomePage> {
                   });
 
           }
-
         }
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Movies'),
-      ),
-      body: Container(
-        color: Colors.black54,
-        width: double.infinity,
-        child: _buildSwiper(),
-      ),
     );
   }
 }

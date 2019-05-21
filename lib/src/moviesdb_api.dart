@@ -6,6 +6,12 @@ import 'package:movies_app/src/config.dart';
 
 import 'package:movies_app/src/models/movie_entity.dart';
 
+enum moviesDBAPIEndpoints {
+  NOW_PLAYING,
+  TOP_RATED,
+  UPCOMING
+}
+
 class MoviesDBAPI {
   MoviesDBAPI({
     this.apiKey,
@@ -23,7 +29,26 @@ class MoviesDBAPI {
 
   static const Map<String, String> endpoints = {
     'nowPlaying': 'movie/now_playing',
+    'topRated': 'movie/top_rated',
+    'upcoming': 'movie/upcoming'
   };
+
+  String _getEndpoint(moviesDBAPIEndpoints endpoint) {
+    switch(endpoint) {
+      case moviesDBAPIEndpoints.NOW_PLAYING:
+        return _setApiVersion(endpoints['nowPlaying']);
+
+      case moviesDBAPIEndpoints.TOP_RATED:
+        return _setApiVersion(endpoints['topRated']);
+
+      case moviesDBAPIEndpoints.UPCOMING:
+        return _setApiVersion(endpoints['upcoming']);
+
+      default:
+        return _setApiVersion(endpoints['nowPlaying']);
+    }
+
+  }
 
   set setLanguage (String lang) {
     defaultLanguage = lang;
@@ -33,8 +58,8 @@ class MoviesDBAPI {
     return '/$apiVersion/$path';
   }
 
-  Future<KtList<MovieEntity>> getNowPlaying () async {
-    Uri uri = Uri.https(baseUrl, _setApiVersion(endpoints['nowPlaying']), {
+  Future<KtList<MovieEntity>> getMovies (moviesDBAPIEndpoints type) async {
+    Uri uri = Uri.https(baseUrl, _getEndpoint(type), {
       'language': defaultLanguage,
       'api_key': apiKey
     });
