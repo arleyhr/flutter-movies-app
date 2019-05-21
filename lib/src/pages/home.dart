@@ -1,9 +1,6 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:kt_dart/collection.dart';
-
-import 'package:movies_app/src/models/movie_entity.dart';
 import 'package:movies_app/src/moviesdb_api.dart';
+import 'package:movies_app/src/providers/movie_provider.dart';
 import 'package:movies_app/src/widgets/buttons_group.dart';
 import 'package:movies_app/src/widgets/movies_swiper.dart';
 
@@ -13,22 +10,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  StreamController<KtList<MovieEntity>> _swiperDataController;
   moviesDBAPIEndpoints buttonSelected = moviesDBAPIEndpoints.NOW_PLAYING;
 
   @override
   void initState() {
     super.initState();
 
-    _swiperDataController = new StreamController<KtList<MovieEntity>>.broadcast();
     _getSwiperMovies(buttonSelected);
   }
 
   void _getSwiperMovies(moviesDBAPIEndpoints movieEndpoint) async {
-
-    KtList<MovieEntity> result = await moviesDBAPI.getMovies(movieEndpoint);
-
-    _swiperDataController.add(result);
+    movieProvider.getFeaturedMovies(buttonSelected);
   }
 
   void _handleSwiperButtonPressed(moviesDBAPIEndpoints movieEndpoint) {
@@ -88,16 +80,10 @@ class _HomePageState extends State<HomePage> {
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
             _buildButtonsGroup(),
-            MoviesSwiper(stream: _swiperDataController.stream)
+            MoviesSwiper(stream: movieProvider.featuredMoviesStream)
           ],
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _swiperDataController.close();
   }
 }
