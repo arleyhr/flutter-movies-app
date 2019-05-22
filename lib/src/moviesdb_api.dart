@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:kt_dart/collection.dart';
-import 'package:http/http.dart';
-import 'package:movies_app/src/config.dart';
 
+import 'package:http/http.dart';
+import 'package:kt_dart/collection.dart';
+import 'package:movies_app/src/config.dart';
 import 'package:movies_app/src/models/movie_entity.dart';
 
 enum moviesDBAPIEndpoints {
   NOW_PLAYING,
   TOP_RATED,
-  UPCOMING
+  UPCOMING,
+  POPULAR
 }
 
 class MoviesDBAPI {
@@ -30,7 +31,9 @@ class MoviesDBAPI {
   static const Map<String, String> endpoints = {
     'nowPlaying': 'movie/now_playing',
     'topRated': 'movie/top_rated',
-    'upcoming': 'movie/upcoming'
+    'upcoming': 'movie/upcoming',
+    'popular': 'movie/popular',
+
   };
 
   String _getEndpoint(moviesDBAPIEndpoints endpoint) {
@@ -43,6 +46,9 @@ class MoviesDBAPI {
 
       case moviesDBAPIEndpoints.UPCOMING:
         return _setApiVersion(endpoints['upcoming']);
+
+      case moviesDBAPIEndpoints.POPULAR:
+        return _setApiVersion(endpoints['popular']);
 
       default:
         return _setApiVersion(endpoints['nowPlaying']);
@@ -58,10 +64,11 @@ class MoviesDBAPI {
     return '/$apiVersion/$path';
   }
 
-  Future<KtList<MovieEntity>> getMovies (moviesDBAPIEndpoints type) async {
+  Future<KtList<MovieEntity>> getMovies (moviesDBAPIEndpoints type, [Map params = const {}]) async {
     Uri uri = Uri.https(baseUrl, _getEndpoint(type), {
       'language': defaultLanguage,
-      'api_key': apiKey
+      'api_key': apiKey,
+      ...params
     });
 
     Response response = await _client.get(uri);

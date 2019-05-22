@@ -6,14 +6,14 @@ import 'package:movies_app/src/models/movie_entity.dart';
 
 
 class MoviesSwiper extends StatelessWidget {
-  MoviesSwiper({ @required this.stream });
+  MoviesSwiper({ @required this.moviesStream });
 
-  Stream<KtList<MovieEntity>> stream;
+  Stream<KtList<MovieEntity>> moviesStream;
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: stream,
+        stream: moviesStream,
         builder: (BuildContext context, AsyncSnapshot<KtList<MovieEntity>> snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.none:
@@ -32,7 +32,7 @@ class MoviesSwiper extends StatelessWidget {
                   layout: SwiperLayout.STACK,
                   itemCount: snapshot.data.size,
                   itemWidth: 300.0,
-                  itemHeight: 500.0,
+                  itemHeight: 400.0,
                   itemBuilder: (BuildContext context, index) {
                     MovieEntity item = snapshot.data.get(index);
 

@@ -6,21 +6,41 @@ import 'package:movies_app/src/moviesdb_api.dart';
 
 class MovieProvider {
 
+  KtList<MovieEntity> _popularMovies = emptyList();
+  int _currentPopularMoviesPage = 1;
+
+  final _popularMoviesStreamController = StreamController<KtList<MovieEntity>>.broadcast();
   final _featuredMoviesStreamController = StreamController<KtList<MovieEntity>>.broadcast();
 
+  // Featured Movies
   Function(KtList<MovieEntity>) get featuredMoviesSick => _featuredMoviesStreamController.sink.add;
-
   Stream<KtList<MovieEntity>> get featuredMoviesStream => _featuredMoviesStreamController.stream;
 
-  getFeaturedMovies (moviesDBAPIEndpoints endpoint) async {
+  // PopularMovies
+  Function(KtList<MovieEntity>) get popularMoviesSick => _popularMoviesStreamController.sink.add;
+  Stream<KtList<MovieEntity>> get popularMoviesStream => _popularMoviesStreamController.stream;
+
+  void getFeaturedMovies (moviesDBAPIEndpoints endpoint) async {
     KtList<MovieEntity> result = await moviesDBAPI.getMovies(endpoint);
 
     featuredMoviesSick(result);
+  }
 
+  void getPopularMovies () async {
+    KtList<MovieEntity> result = await moviesDBAPI.getMovies(moviesDBAPIEndpoints.POPULAR, {
+      "page": _currentPopularMoviesPage.toString()
+    });
+
+    _currentPopularMoviesPage++;
+
+    _popularMovies = _popularMovies.plus(result);
+
+    popularMoviesSick( _popularMovies );
   }
 
   void disposeStream() {
     _featuredMoviesStreamController?.close();
+    _popularMoviesStreamController?.close();
   }
 }
 
