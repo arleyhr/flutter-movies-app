@@ -1,8 +1,7 @@
 # movies_app
-
-A new Flutter project.
-
 ## Getting Started
+
+![preview](https://github.com/arleyhr/flutter-movies-app/blob/master/screenshots/app.gif?raw=true)
 
 This project is a starting point for a Flutter application.
 
