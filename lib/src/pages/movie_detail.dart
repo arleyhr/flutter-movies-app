@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:movies_app/src/models/movie_entity.dart';
+import 'package:movies_app/src/providers/movie_provider.dart';
 import 'package:movies_app/src/widgets/detail_app_bar_sliver.dart';
 import 'package:movies_app/src/widgets/movie_poster.dart';
+import 'package:movies_app/src/widgets/movies_horizontal.dart';
+
 
 class MovieDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MovieEntity movie = ModalRoute.of(context).settings.arguments;
+
+    movieProvider.getSimilarMovies(movie.id.toString());
 
     return Scaffold(
         body: CustomScrollView(
@@ -23,15 +28,8 @@ class MovieDetail extends StatelessWidget {
                     _buildDescription(movie.overview),
                     _buildDescription(movie.overview),
                     _buildDescription(movie.overview),
-                    _buildDescription(movie.overview),
-                    _buildDescription(movie.overview),
-                    _buildDescription(movie.overview),
-                    _buildDescription(movie.overview),
-                    _buildDescription(movie.overview),
-                    _buildDescription(movie.overview),
-                    _buildDescription(movie.overview),
-                    _buildDescription(movie.overview),
-
+                    _buildTitle('Similar'),
+                    MoviesHorizontal(moviesStream: movieProvider.similarMoviesStream, getMoreMovies: () {})
                   ]
               ),
             )
@@ -46,6 +44,13 @@ Widget _buildDescription (String description) {
   return Container(
       margin: EdgeInsets.all(20.0),
       child: Text(description)
+  );
+}
+
+Widget _buildTitle (String title) {
+  return Container(
+      margin: EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
+      child: Text(title, style: TextStyle(fontSize: 24.0))
   );
 }
 

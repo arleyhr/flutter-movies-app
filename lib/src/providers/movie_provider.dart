@@ -27,16 +27,17 @@ class MovieProvider {
 
   void getFeaturedMovies (moviesDBAPIEndpoints endpoint) async {
     KtList<MovieEntity> result = await moviesDBAPI.getMovies(endpoint);
-
     featuredMoviesSick(result);
   }
 
   void getSimilarMovies (String movieId) async {
-    KtList<MovieEntity> result = await moviesDBAPI.getMovies(moviesDBAPIEndpoints.SIMILAR
-    );
-
-
-    similarMoviesSick(result);
+    KtList<MovieEntity> result = await moviesDBAPI.getMovies(moviesDBAPIEndpoints.SIMILAR, {
+      'variables': {
+        'movie_id': movieId
+      }
+    });
+    
+    similarMoviesSick(result.filter((item) => item.id.toString() != movieId));
   }
 
   void getPopularMovies () async {

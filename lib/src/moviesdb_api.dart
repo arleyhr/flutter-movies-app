@@ -76,15 +76,17 @@ class MoviesDBAPI {
     defaultLanguage = lang;
   }
 
-  String _setApiVersion(String path, [Map variables]) {
-    return '/$apiVersion/$path';
+  String _setApiVersion(String path, [Map variables = const {}]) {
+    return _replaceEndpointParams('/$apiVersion/$path', variables);
   }
 
   Future<KtList<MovieEntity>> getMovies (moviesDBAPIEndpoints type, [Map params = const {}]) async {
-    Uri uri = Uri.https(baseUrl, _getEndpoint(type, params['variables'] ?? {}), {
+    Map variables = params['variables'] ?? {};
+    Map paramsMap = params['params'] ?? {};
+    Uri uri = Uri.https(baseUrl, _getEndpoint(type, variables), {
       'language': defaultLanguage,
       'api_key': apiKey,
-      ...params
+      ...paramsMap
     });
 
     Response response = await _client.get(uri);

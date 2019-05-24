@@ -4,30 +4,35 @@ import 'package:movies_app/src/models/movie_entity.dart';
 import 'package:movies_app/src/widgets/movie_poster.dart';
 
 
-class MoviesHorizontal extends StatelessWidget {
-  MoviesHorizontal({ @required this.moviesStream, @required this.getMoreMovies });
-
-
+class MoviesHorizontal extends StatefulWidget {
+  MoviesHorizontal({ @required this.moviesStream, this.getMoreMovies });
   final Stream<KtList<MovieEntity>> moviesStream;
   final Function getMoreMovies;
-  final PageController _pageController = new PageController(initialPage: 1, viewportFraction: 0.3);
 
+  @override
+  _MoviesHorizontalState createState() => _MoviesHorizontalState();
+}
+
+class _MoviesHorizontalState extends State<MoviesHorizontal> {
+  final PageController _pageController = new PageController(initialPage: 1, viewportFraction: 0.3);
 
   @override
   Widget build(BuildContext context) {
     final _screenSize = MediaQuery.of(context).size;
 
-    _pageController.addListener(() {
+    if (widget.getMoreMovies != null) {
+      _pageController.addListener(() {
 
-      if (_pageController.position.pixels >= _pageController.position.maxScrollExtent - 200)
-        getMoreMovies();
+        if (_pageController.position.pixels >= _pageController.position.maxScrollExtent - 200)
+          widget.getMoreMovies();
 
-    });
+      });
+    }
 
     return Container(
       height: _screenSize.height * 0.23,
       child: StreamBuilder(
-        stream: moviesStream,
+        stream: widget.moviesStream,
         builder: (BuildContext context, AsyncSnapshot<KtList<MovieEntity>> snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.none:
@@ -53,6 +58,13 @@ class MoviesHorizontal extends StatelessWidget {
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+
+    _pageController?.dispose();
+    super.dispose();
   }
 }
 
