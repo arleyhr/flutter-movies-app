@@ -12,6 +12,8 @@ class MoviesSwiper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+
     return StreamBuilder(
         stream: moviesStream,
         builder: (BuildContext context, AsyncSnapshot<KtList<MovieEntity>> snapshot) {
@@ -31,8 +33,12 @@ class MoviesSwiper extends StatelessWidget {
               return Swiper(
                   layout: SwiperLayout.STACK,
                   itemCount: snapshot.data.size,
-                  itemWidth: 300.0,
-                  itemHeight: 400.0,
+                  itemWidth: size.width * 0.6,
+                  itemHeight: size.height * 0.45,
+                  onTap: (index) {
+                    MovieEntity movie = snapshot.data.get(index);
+                    Navigator.pushNamed(context, 'movieDetail', arguments: movie);
+                  },
                   itemBuilder: (BuildContext context, index) {
                     MovieEntity item = snapshot.data.get(index);
 

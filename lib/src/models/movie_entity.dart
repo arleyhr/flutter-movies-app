@@ -107,6 +107,10 @@ class MovieEntity {
 		return getMdbImage(src: posterPath, width: width);
 	}
 
+	String getBackdropImage({ int width }) {
+		return getMdbImage(src: backdropPath, width: width);
+	}
+
 }
 
 class MovieGenre {

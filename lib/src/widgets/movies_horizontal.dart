@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kt_dart/kt.dart';
 import 'package:movies_app/src/models/movie_entity.dart';
+import 'package:movies_app/src/widgets/movie_poster.dart';
 
 
 class MoviesHorizontal extends StatelessWidget {
@@ -24,7 +25,7 @@ class MoviesHorizontal extends StatelessWidget {
     });
 
     return Container(
-      height: _screenSize.height * 0.2,
+      height: _screenSize.height * 0.23,
       child: StreamBuilder(
         stream: moviesStream,
         builder: (BuildContext context, AsyncSnapshot<KtList<MovieEntity>> snapshot) {
@@ -34,8 +35,7 @@ class MoviesHorizontal extends StatelessWidget {
               return Center(
                   child: CircularProgressIndicator(
                       backgroundColor: Colors.red,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.redAccent)
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.redAccent)
                   )
               );
             case ConnectionState.active:
@@ -63,18 +63,22 @@ Widget _buildCard (BuildContext context, MovieEntity movie) {
     margin: EdgeInsets.only(right: 15.0),
     child: Column(
       children: <Widget>[
-        Hero(
-          tag: posterId,
-          child: ClipRRect(
-              borderRadius: BorderRadius.circular(20.0),
-              child: FadeInImage(
-                image: NetworkImage(movie.getPosterImage()),
-                placeholder: AssetImage('assets/images/placeholder.png'),
-                fit: BoxFit.cover,
-                height: 160.0,
-              )
-          ),
+        MoviePoster(
+          posterId: posterId,
+          poster: NetworkImage(movie.getPosterImage()),
+          onPressed: () {
+            Navigator.pushNamed(context, 'movieDetail', arguments: movie);
+          }
         ),
+        SizedBox(height: 5.0),
+        Text(
+          movie.title,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 14.0,
+            color: Colors.white
+          ),
+        )
       ],
     ),
   );

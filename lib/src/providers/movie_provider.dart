@@ -11,6 +11,7 @@ class MovieProvider {
 
   final _popularMoviesStreamController = StreamController<KtList<MovieEntity>>.broadcast();
   final _featuredMoviesStreamController = StreamController<KtList<MovieEntity>>.broadcast();
+  final _similarMoviesStreamController = StreamController<KtList<MovieEntity>>.broadcast();
 
   // Featured Movies
   Function(KtList<MovieEntity>) get featuredMoviesSick => _featuredMoviesStreamController.sink.add;
@@ -20,10 +21,22 @@ class MovieProvider {
   Function(KtList<MovieEntity>) get popularMoviesSick => _popularMoviesStreamController.sink.add;
   Stream<KtList<MovieEntity>> get popularMoviesStream => _popularMoviesStreamController.stream;
 
+  // SimilarMovies
+  Function(KtList<MovieEntity>) get similarMoviesSick => _similarMoviesStreamController.sink.add;
+  Stream<KtList<MovieEntity>> get similarMoviesStream => _similarMoviesStreamController.stream;
+
   void getFeaturedMovies (moviesDBAPIEndpoints endpoint) async {
     KtList<MovieEntity> result = await moviesDBAPI.getMovies(endpoint);
 
     featuredMoviesSick(result);
+  }
+
+  void getSimilarMovies (String movieId) async {
+    KtList<MovieEntity> result = await moviesDBAPI.getMovies(moviesDBAPIEndpoints.SIMILAR
+    );
+
+
+    similarMoviesSick(result);
   }
 
   void getPopularMovies () async {
@@ -41,6 +54,7 @@ class MovieProvider {
   void disposeStream() {
     _featuredMoviesStreamController?.close();
     _popularMoviesStreamController?.close();
+    _similarMoviesStreamController?.close();
   }
 }
 

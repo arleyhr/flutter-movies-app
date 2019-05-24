@@ -10,7 +10,8 @@ enum moviesDBAPIEndpoints {
   NOW_PLAYING,
   TOP_RATED,
   UPCOMING,
-  POPULAR
+  POPULAR,
+  SIMILAR
 }
 
 class MoviesDBAPI {
@@ -33,25 +34,40 @@ class MoviesDBAPI {
     'topRated': 'movie/top_rated',
     'upcoming': 'movie/upcoming',
     'popular': 'movie/popular',
+    'similar': 'movie/{movie_id}/similar'
 
   };
 
-  String _getEndpoint(moviesDBAPIEndpoints endpoint) {
+  String _replaceEndpointParams (String endpoint, [Map params = const {}]) {
+    String output = endpoint;
+
+    params.keys.forEach((key) {
+      String value = params[key].toString();
+      output = output.replaceAll('{$key}', value);
+    });
+
+    return output;
+  }
+
+  String _getEndpoint(moviesDBAPIEndpoints endpoint, [Map variables = const {}]) {
     switch(endpoint) {
       case moviesDBAPIEndpoints.NOW_PLAYING:
-        return _setApiVersion(endpoints['nowPlaying']);
+        return _setApiVersion(endpoints['nowPlaying'], variables);
 
       case moviesDBAPIEndpoints.TOP_RATED:
-        return _setApiVersion(endpoints['topRated']);
+        return _setApiVersion(endpoints['topRated'], variables);
 
       case moviesDBAPIEndpoints.UPCOMING:
-        return _setApiVersion(endpoints['upcoming']);
+        return _setApiVersion(endpoints['upcoming'], variables);
 
       case moviesDBAPIEndpoints.POPULAR:
-        return _setApiVersion(endpoints['popular']);
+        return _setApiVersion(endpoints['popular'], variables);
+
+      case moviesDBAPIEndpoints.SIMILAR:
+        return _setApiVersion(endpoints['similar'], variables);
 
       default:
-        return _setApiVersion(endpoints['nowPlaying']);
+        return _setApiVersion(endpoints['nowPlaying'], variables);
     }
 
   }
@@ -60,12 +76,12 @@ class MoviesDBAPI {
     defaultLanguage = lang;
   }
 
-  String _setApiVersion(String path) {
+  String _setApiVersion(String path, [Map variables]) {
     return '/$apiVersion/$path';
   }
 
   Future<KtList<MovieEntity>> getMovies (moviesDBAPIEndpoints type, [Map params = const {}]) async {
-    Uri uri = Uri.https(baseUrl, _getEndpoint(type), {
+    Uri uri = Uri.https(baseUrl, _getEndpoint(type, params['variables'] ?? {}), {
       'language': defaultLanguage,
       'api_key': apiKey,
       ...params
